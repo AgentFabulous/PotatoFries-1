@@ -37,24 +37,14 @@ jobs:
       - run: flutter clean
       - run: flutter build apk --target-platform android-x64
       - run: cp build/app/outputs/flutter-apk/app-release.apk outputs/android-x64.apk
-      - run: flutter clean      
-#       - name: Create Release
-#         id: create_release
-#         uses: actions/create-release@v1
-#         env:
-#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#         with:
-#           tag_name: ${{ github.ref }}
-#           release_name: Release ${{ github.ref }}
-#           draft: false
-#           prerelease: false
+      - run: flutter clean
       - run: |
           set -x
           assets=()
           for asset in ./outputs/*.apk; do
             assets+=("-a" "$asset")
           done
-          tag_name="${GITHUB_REF##*/}"
-          hub release create "${assets[@]}" -m "$tag_name" "$tag_name"
+          version="$(cat pubspec.yaml | grep version | cut -d : -f 2 | xargs)"
+          hub release create "${assets[@]}" -m "v$version" "$version"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
